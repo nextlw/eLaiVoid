@@ -1,0 +1,87 @@
+---
+config:
+  layout: elk
+  theme: default
+  look: classic
+id: 8805e44b-ac18-4476-83dc-9e296d6a9f06
+---
+flowchart TD
+ subgraph ToolRegistry["Registro de Ferramentas (app/tool)"]
+        SuggestNCM["SuggestNCMTool<br>(consulta_ncm.py)"]
+        GetAttrs["GetNCMAttributesTool<br>(atributos_ncm.py)"]
+        ValidateNCM["ValidacaoNCMTool<br>(validacao_ncm.py)"]
+        Autocomplete["AutocompleteTool<br>(autocompletar_ncm.py)"]
+  end
+ subgraph SharedServices["Serviços Compartilhados"]
+        NCMService["NCMAttributesService\n(atributos.py)"]
+        LLMService["Funções LLM\n(llm_services.py)"]
+        RedisService["Cliente Redis\n(redis_service.py)"]
+        SupabaseService["Cliente Supabase\n(supabase_service.py)"]
+        AuthService["NCMAuthService\n(auth_service.py)"]
+        Functions["Funções e Schemas"]
+        GetAttributes["get_attributes_for_ncm"]
+        LLMFunctions["get_llm_suggestion_function"]
+        AuthFunctions["get_headers"]
+        SubSchemas["Subschemas"]
+        NCMModel["Modelos NCM"]
+        RedisStruct["Estruturas Redis"]
+  end
+ subgraph Pipeline["Data & Execution Pipeline"]
+        Runner(["📜 MCPRunner<br>(run_mcp.py)"])
+        User(["Usuário"])
+        Agent(["🧠 MCPAgent<br>(Planejador/Orquestrador)"])
+        Connection(["🔌 Conexão<br>(stdio/sse)"])
+        Server(["🖥️ MCPServer<br>(Executor das Ferramentas)"])
+        ToolRegistry
+        SharedServices
+        ApiSiscomex["API Siscomex"]
+        LLMs["Modelos de Linguagem (APIs)"]
+        SupabaseDB["Banco Supabase"]
+        RedisDB["Banco Redis"]
+        OutrasFerramentas["..."]
+        SuggestNCM
+        GetAttrs
+        ValidateNCM
+        Autocomplete
+        NCMService
+        LLMService
+        RedisService
+        SupabaseService
+        AuthService
+        Functions
+        GetAttributes
+        LLMFunctions
+        AuthFunctions
+        SubSchemas
+        NCMModel
+        RedisStruct
+  end
+ subgraph ExternalSystems["Sistemas Externos"]
+        ApiSiscomex
+        LLMs
+        SupabaseDB
+        RedisDB
+        OutrasFerramentas
+  end
+    User --> Runner
+    Runner --> Agent
+    Agent --> Connection
+    Connection --> Server
+    Server --> ToolRegistry
+    ToolRegistry --> SuggestNCM & GetAttrs & ValidateNCM & Autocomplete
+    GetAttributes --> Functions
+    LLMFunctions --> Functions
+    AuthFunctions --> Functions
+    NCMModel --> SubSchemas
+    RedisStruct --> SubSchemas
+    SuggestNCM -- Uses --> NCMService & LLMService & RedisService & GetAttributes & LLMFunctions
+    GetAttrs -- Uses --> NCMService & SupabaseService & GetAttributes
+    ValidateNCM -- Uses --> NCMService & SupabaseService & GetAttributes
+    Autocomplete -- Uses --> SupabaseService
+    NCMService -- Consults --> ApiSiscomex & SupabaseService
+    LLMService -- Calls --> LLMs
+    RedisService -- Connects --> RedisDB
+    SupabaseService -- Connects --> SupabaseDB
+    AuthService -- Authenticates --> ApiSiscomex
+     Agent:::agentHighlight
+    classDef agentHighlight fill:#f4f7fc,stroke:#5b8,stroke-width:2px
