@@ -1,0 +1,44 @@
+---
+config:
+  layout: elk
+  theme: mc
+  look: handDrawn
+---
+flowchart TD
+    subgraph "Processo do Navegador"
+        A[SidebarChat.tsx] --> B[chatThreadsService]
+        B --> C[toolsService]
+        B --> G[sendLLMMessageService]
+        C --> D[terminalToolService]
+        C --> E[editCodeService]
+        E --> G
+        G --> H[sendLLMMessageChannel]
+        A1["Renderiza a barra lateral"] -.- A
+        B1["Executa o modo agente<br>Gerencia todos os chats"] -.- B
+        C1["Define ferramentas que o LLM pode chamar"] -.- C
+        D1["Gerencia o estado da ferramenta de terminal"] -.- D
+        E1["Chamado quando clica em 'Aplicar'<br>Ou executa Cmd+X<br>Ou o LLM chama a ferramenta 'Editar'"] -.- E
+        G1["Envia uma mensagem para o LLM"] -.- G
+    end
+    subgraph "Processo Principal"
+        H --> M[sendLLMMessage]
+        M --> I[sendLLMMessage.impl]
+        I --> J[Anthropic]
+        I --> K[OpenRouter]
+        I --> L[Ollama]
+        I --> O[Vertex, Bedrock, WLM, etc]
+        I --> N[modelCapabilities]
+        N --> P[extractGrammar]
+        M1["Envia no processo principal<br>Pode enviar Chat, FIM (autocompletar), ou listAllModels()"] -.- M
+        N1["Arquivo de contabilidade do Void para provedores/modelos<br>Informa tamanho de contexto, suporte a ferramentas, formatos, etc"] -.- N
+        P1["Extrai raciocínio e chamadas de ferramentas do texto simples<br>antes de chegarem ao navegador (se relevante)"] -.- P
+    end
+    style A1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style B1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style C1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style D1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style E1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style G1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style M1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style N1 fill:#ffffff,stroke:#ffffff,color:#555555
+    style P1 fill:#ffffff,stroke:#ffffff,color:#555555
