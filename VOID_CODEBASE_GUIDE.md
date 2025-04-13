@@ -1,12 +1,12 @@
-# Guia da Base de Código do Void
+# Guia da Base de Código do Loid
 
-A base de código do Void não é tão intimidadora quanto parece!
+A base de código do Loid não é tão intimidadora quanto parece!
 
-A maior parte do código do Void está na pasta `src/vs/workbench/contrib/void/`.
+A maior parte do código do Loid está na pasta `src/vs/workbench/contrib/Loid/`.
 
-O objetivo deste documento é explicar como a base de código do Void funciona. Se você quiser instruções de compilação, veja [Contribuindo](https://github.com/voideditor/void/blob/main/HOW_TO_CONTRIBUTE.md).
+O objetivo deste documento é explicar como a base de código do Loid funciona. Se você quiser instruções de compilação, veja [Contribuindo](https://github.com/Loideditor/Loid/blob/main/HOW_TO_CONTRIBUTE.md).
 
-## Guia da Base de Código do Void
+## Guia da Base de Código do Loid
 
 ### Terminologia
 
@@ -20,9 +20,9 @@ Aqui está uma terminologia importante que você deve conhecer se estiver trabal
 
 ### Resumo Mínimo do VSCode
 
-Aqui está um resumo mínimo do VSCode se você está apenas começando com o Void:
+Aqui está um resumo mínimo do VSCode se você está apenas começando com o Loid:
 
-- O VSCode é (e, portanto, o Void é) um aplicativo Electron. O Electron executa dois processos: um processo **main** (para internos) e um processo **browser** (browser significa HTML em geral, não apenas "navegador web").
+- O VSCode é (e, portanto, o Loid é) um aplicativo Electron. O Electron executa dois processos: um processo **main** (para internos) e um processo **browser** (browser significa HTML em geral, não apenas "navegador web").
 - O código em uma pasta `browser/` sempre vive no processo do navegador e pode usar `window` e outros itens do navegador.
 - O código em uma pasta `electron-main/` sempre vive no processo principal e pode importar `node_modules`.
 - O código em `common/` pode ser usado por qualquer processo, mas não recebe importações especiais.
@@ -32,17 +32,17 @@ Aqui está um resumo mínimo do VSCode se você está apenas começando com o Vo
 
 O VSCode é organizado em "Serviços". Um serviço é apenas uma classe que é montada uma única vez (na teoria da ciência da computação, isso é chamado de "singleton"). Você pode registrar serviços com `registerSingleton` para poder usá-los facilmente em qualquer construtor com `@<Service>`. Veja \_dummyContrib para um exemplo que montamos sobre como registrá-los. O registro é o mesmo todas as vezes.
 
-Os serviços são sempre criados de forma preguiçosa, mesmo que você os registre como Eager. Se você quiser algo que sempre seja executado na montagem do Void, você deve usar uma "contribuição de workbench". Veja \_dummyContrib para isso. Muito semelhante a um Serviço, apenas registrado de forma ligeiramente diferente.
+Os serviços são sempre criados de forma preguiçosa, mesmo que você os registre como Eager. Se você quiser algo que sempre seja executado na montagem do Loid, você deve usar uma "contribuição de workbench". Veja \_dummyContrib para isso. Muito semelhante a um Serviço, apenas registrado de forma ligeiramente diferente.
 
 Ações ou "comandos" são funções que você registra no VSCode para que você ou o usuário possam chamá-las posteriormente. Você pode executar ações como usuário pressionando Cmd+Shift+P (abre a paleta de comandos), ou pode executá-las internamente usando o commandService para chamá-las por ID. Usamos ações para registrar listeners de atalhos de teclado como Cmd+L, Cmd+K, etc. O legal das ações é que o usuário pode alterar os atalhos de teclado.
 
 Veja [aqui](https://github.com/microsoft/vscode/wiki/Source-Code-Organization) um guia decente do VSCode com ainda mais informações.
 
-Cada seção abaixo contém uma visão geral de uma parte central do código-fonte do Void. Você pode querer rolar para encontrar o item relevante para você.
+Cada seção abaixo contém uma visão geral de uma parte central do código-fonte do Loid. Você pode querer rolar para encontrar o item relevante para você.
 
 ### Pipeline de Mensagens LLM Internas
 
-Aqui está uma imagem de todas as dependências relevantes entre o momento em que você envia uma mensagem pela primeira vez através da barra lateral do Void e o momento em que uma solicitação é enviada ao seu provedor.
+Aqui está uma imagem de todas as dependências relevantes entre o momento em que você envia uma mensagem pela primeira vez através da barra lateral do Loid e o momento em que uma solicitação é enviada ao seu provedor.
 Enviar mensagens LLM do processo principal evita problemas de CSP com provedores locais e nos permite usar node_modules com mais facilidade.
 
 ```mermaid
@@ -78,7 +78,7 @@ flowchart TD
         I --> N[modelCapabilities]
         N --> P[extractGrammar]
         M1["Envia no processo principal<br>Pode enviar Chat, FIM (autocompletar), ou listAllModels()"] -.- M
-        N1["Arquivo de contabilidade do Void para provedores/modelos<br>Informa tamanho de contexto, suporte a ferramentas, formatos, etc"] -.- N
+        N1["Arquivo de contabilidade do Loid para provedores/modelos<br>Informa tamanho de contexto, suporte a ferramentas, formatos, etc"] -.- N
         P1["Extrai raciocínio e chamadas de ferramentas do texto simples<br>antes de chegarem ao navegador (se relevante)"] -.- P
     end
     style A1 fill:#ffffff,stroke:#ffffff,color:#555555
@@ -101,7 +101,7 @@ flowchart TD
 
 ### Apply
 
-O Void tem dois tipos de Apply: **Fast Apply** (usa Buscar/Substituir, veja abaixo) e **Slow Apply** (reescreve o arquivo inteiro).
+O Loid tem dois tipos de Apply: **Fast Apply** (usa Buscar/Substituir, veja abaixo) e **Slow Apply** (reescreve o arquivo inteiro).
 
 Quando você clica em Apply e o Fast Apply está habilitado, solicitamos que o LLM gere blocos de Buscar/Substituir como este:
 
@@ -113,7 +113,7 @@ Quando você clica em Apply e o Fast Apply está habilitado, solicitamos que o L
 >>>>>>> UPDATED
 ```
 
-Isso é o que permite que o Void aplique código rapidamente mesmo em arquivos de 1000 linhas. É o mesmo que pedir ao LLM para pressionar Ctrl+F e inserir uma consulta de busca/substituição.
+Isso é o que permite que o Loid aplique código rapidamente mesmo em arquivos de 1000 linhas. É o mesmo que pedir ao LLM para pressionar Ctrl+F e inserir uma consulta de busca/substituição.
 
 ### Funcionamento Interno do Apply
 
@@ -130,11 +130,11 @@ Aqui está uma terminologia importante:
 
 ### Funcionamento Interno da Escrita de Arquivos
 
-Quando o Void quer alterar seu código, ele simplesmente escreve em um modelo de texto. Isso significa que tudo o que você precisa saber para escrever em um arquivo é sua URI - você não precisa carregá-lo, salvá-lo, etc. Existem algumas coisas irritantes de fundo de URI/modelo para pensar para fazer isso funcionar, mas lidamos com todas elas em `voidModelService`.
+Quando o Loid quer alterar seu código, ele simplesmente escreve em um modelo de texto. Isso significa que tudo o que você precisa saber para escrever em um arquivo é sua URI - você não precisa carregá-lo, salvá-lo, etc. Existem algumas coisas irritantes de fundo de URI/modelo para pensar para fazer isso funcionar, mas lidamos com todas elas em `LoidModelService`.
 
-### Funcionamento Interno das Configurações do Void
+### Funcionamento Interno das Configurações do Loid
 
-Temos um serviço `voidSettingsService` que armazena todas as suas configurações do Void (provedores, modelos, configurações globais do Void, etc). Imagine isso como uma dependência implícita para qualquer um dos serviços principais do Void:
+Temos um serviço `LoidSettingsService` que armazena todas as suas configurações do Loid (provedores, modelos, configurações globais do Loid, etc). Imagine isso como uma dependência implícita para qualquer um dos serviços principais do Loid:
 
 <div align="center">
 	<img width="800" src="https://github.com/user-attachments/assets/9f3cb68c-a61b-4810-8429-bb90b992b3fa">
@@ -159,11 +159,11 @@ As estruturas de dados de `editCodeService` contêm todas as informações sobre
 
 ### Processo de Compilação
 
-Se você quiser saber como nosso pipeline de compilação funciona, veja nosso repositório de compilação [aqui](https://github.com/voideditor/void-builder).
+Se você quiser saber como nosso pipeline de compilação funciona, veja nosso repositório de compilação [aqui](https://github.com/Loideditor/Loid-builder).
 
-## Guia da Base de Código do VSCode (Não Void)
+## Guia da Base de Código do VSCode (Não Loid)
 
-A equipe do Void reuniu esta lista de links para ajudar a entender o código-fonte do VSCode, a base do Void. Esperamos que seja útil!
+A equipe do Loid reuniu esta lista de links para ajudar a entender o código-fonte do VSCode, a base do Loid. Esperamos que seja útil!
 
 #### Links para Iniciantes
 
@@ -182,7 +182,7 @@ A equipe do Void reuniu esta lista de links para ajudar a entender o código-fon
 
 #### API de Extensão do VSCode
 
-O Void não é mais uma extensão, então esses links não são mais necessários, mas podem ser úteis se algum dia construirmos uma extensão novamente.
+O Loid não é mais uma extensão, então esses links não são mais necessários, mas podem ser úteis se algum dia construirmos uma extensão novamente.
 
 - [Arquivos necessários em uma extensão](https://code.visualstudio.com/api/get-started/extension-anatomy).
 - [Esquema de `package.json` de uma extensão](https://code.visualstudio.com/api/references/extension-manifest).
