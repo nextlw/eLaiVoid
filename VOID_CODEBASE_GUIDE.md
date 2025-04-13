@@ -1,8 +1,8 @@
-# Guia da Base de Código do Void
+# Guia da Base de Código do Loid
 
-A base de código do Void não é tão intimidadora quanto parece!
+A base de código do Loid não é tão intimidadora quanto parece!
 
-A maior parte do código do Void está na pasta `src/vs/workbench/contrib/void/`.
+A maior parte do código do Loid está na pasta `src/vs/workbench/contrib/Loid/`.
 
 The purpose of this document is to explain how Void's codebase works. If you want build instructions instead, see [Contributing](https://github.com/voideditor/void/blob/main/HOW_TO_CONTRIBUTE.md).
 
@@ -54,7 +54,7 @@ Sending LLM messages from the main process avoids CSP issues with local provider
 
 ### Apply
 
-O Void tem dois tipos de Apply: **Fast Apply** (usa Buscar/Substituir, veja abaixo) e **Slow Apply** (reescreve o arquivo inteiro).
+O Loid tem dois tipos de Apply: **Fast Apply** (usa Buscar/Substituir, veja abaixo) e **Slow Apply** (reescreve o arquivo inteiro).
 
 Quando você clica em Apply e o Fast Apply está habilitado, solicitamos que o LLM gere blocos de Buscar/Substituir como este:
 
@@ -86,11 +86,11 @@ How Apply works:
 
 ### Funcionamento Interno da Escrita de Arquivos
 
-Quando o Void quer alterar seu código, ele simplesmente escreve em um modelo de texto. Isso significa que tudo o que você precisa saber para escrever em um arquivo é sua URI - você não precisa carregá-lo, salvá-lo, etc. Existem algumas coisas irritantes de fundo de URI/modelo para pensar para fazer isso funcionar, mas lidamos com todas elas em `voidModelService`.
+Quando o Loid quer alterar seu código, ele simplesmente escreve em um modelo de texto. Isso significa que tudo o que você precisa saber para escrever em um arquivo é sua URI - você não precisa carregá-lo, salvá-lo, etc. Existem algumas coisas irritantes de fundo de URI/modelo para pensar para fazer isso funcionar, mas lidamos com todas elas em `LoidModelService`.
 
-### Funcionamento Interno das Configurações do Void
+### Funcionamento Interno das Configurações do Loid
 
-Temos um serviço `voidSettingsService` que armazena todas as suas configurações do Void (provedores, modelos, configurações globais do Void, etc). Imagine isso como uma dependência implícita para qualquer um dos serviços principais do Void:
+Temos um serviço `LoidSettingsService` que armazena todas as suas configurações do Loid (provedores, modelos, configurações globais do Loid, etc). Imagine isso como uma dependência implícita para qualquer um dos serviços principais do Loid:
 
 <div align="center">
 	<img width="800" src="https://github.com/user-attachments/assets/9f3cb68c-a61b-4810-8429-bb90b992b3fa">
