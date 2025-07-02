@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+FROM ubuntu:20.04
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    libfuse2 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libxss1 \
+    libxtst6 \
+    libnss3 \
+    libasound2 \
+    libdrm2 \
+    libgbm1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app

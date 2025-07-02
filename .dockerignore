@@ -1,0 +1,17 @@
+Dockerfile.build
+.dockerignore
+.git
+.gitignore
+.DS_Store
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+*.log
+*.err
+node_modules/
+venv/
+*.egg-info/
+*.tox/
+dist/

@@ -423,14 +423,20 @@ export class Mangler {
 		const fileIdents = new ShortIdent('$');
 
 		const visit = (node: ts.Node): void => {
+			const fileName = node.getSourceFile().fileName;
+			// Ignorar arquivos node_modules e arquivos de declaração .d.ts
+			if (fileName.includes('node_modules') || fileName.endsWith('.d.ts')) {
+				return;
+			}
+
 			if (this.config.manglePrivateFields) {
 				if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
 					const anchor = node.name ?? node;
-					const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
+					const key = `${fileName}|${anchor.getStart()}`;
 					if (this.allClassDataByKey.has(key)) {
 						throw new Error('DUPE?');
 					}
-					this.allClassDataByKey.set(key, new ClassData(node.getSourceFile().fileName, node));
+					this.allClassDataByKey.set(key, new ClassData(fileName, node));
 				}
 			}
 
@@ -470,7 +476,7 @@ export class Mangler {
 						return;
 					}
 
-					this.allExportedSymbols.add(new DeclarationData(node.getSourceFile().fileName, node, fileIdents));
+					this.allExportedSymbols.add(new DeclarationData(fileName, node, fileIdents));
 				}
 			}
 
@@ -666,17 +672,36 @@ export class Mangler {
 
 				let lastEdit: Edit | undefined;
 
-				for (const edit of edits) {
-					if (lastEdit && lastEdit.offset === edit.offset) {
-						//
-						if (lastEdit.length !== edit.length || lastEdit.newText !== edit.newText) {
-							this.log('ERROR: Overlapping edit', item.fileName, edit.offset, edits);
-							throw new Error('OVERLAPPING edit');
+				// Função para mesclar edições sobrepostas
+				function mergeEdits(edits: Edit[]): Edit[] {
+					if (edits.length === 0) return [];
+					edits.sort((a, b) => a.offset - b.offset);
+					const merged: Edit[] = [];
+					let current = edits[0];
+					for (let i = 1; i < edits.length; i++) {
+						const next = edits[i];
+						const currentEnd = current.offset + current.length;
+						if (next.offset <= currentEnd) {
+							// Sobreposição detectada, mesclar textos
+							const overlap = currentEnd - next.offset;
+							const nonOverlapText = next.newText.slice(overlap);
+							current = {
+								offset: current.offset,
+								length: (next.offset + next.length) - current.offset,
+								newText: current.newText + nonOverlapText
+							};
 						} else {
-							continue;
+							merged.push(current);
+							current = next;
 						}
 					}
-					lastEdit = edit;
+					merged.push(current);
+					return merged;
+				}
+
+				const mergedEdits = mergeEdits(edits);
+
+				for (const edit of mergedEdits) {
 					const mangledName = characters.splice(edit.offset, edit.length, edit.newText).join('');
 					savedBytes += mangledName.length - edit.newText.length;
 
